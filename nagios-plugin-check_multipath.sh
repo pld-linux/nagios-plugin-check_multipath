@@ -97,13 +97,19 @@ if [ $(id -un) != "root" ]; then
 	fi
 fi
 
-MODCOUNT=`$LSMOD | grep -c ^dm_multipath`
-if [ $MODCOUNT = 0 ]; then
-	echo "MULTIPATH: UNKNOWN - Module dm-multipath not loaded"
+OUTPUT=$($MULTIPATH -l 2>/dev/null)
+if [ $? != 0 ]; then
+	# Failed. grab more info why
+	MODCOUNT=$($LSMOD | grep -c ^dm_multipath)
+	if [ $MODCOUNT = 0 ]; then
+		echo "MULTIPATH: UNKNOWN - Module dm-multipath not loaded"
+		exit $STATE_UNKNOWN
+	fi
+
+	echo "MULTIPATH: $(MULTIPATH -l 2>&1)"
 	exit $STATE_UNKNOWN
 fi
 
-OUTPUT=$($MULTIPATH -l)
 PATHCOUNT=$(echo "$OUTPUT" | wc -l)
 if [ $PATHCOUNT -eq 0 ]; then
 	echo "MULTIPATH: WARNING - No paths defined"
