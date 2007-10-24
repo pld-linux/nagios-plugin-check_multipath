@@ -16,6 +16,7 @@ REVISION=`echo '$Revision$' | sed -e 's/[^0-9.]//g'`
 
 MULTIPATH=/sbin/multipath
 SUDO=/usr/bin/sudo
+LSMOD=/sbin/lsmod
 
 print_usage() {
 	echo "Usage:"
@@ -33,7 +34,11 @@ print_help() {
 	echo "Requires sudo."
 	echo ""
 	echo "Add this to your sudoers file by running visudo to add access:"
-	echo "Cmnd_Alias MULTIPATH=$MULTIPATH -l"
+	if [ -r /proc/modules ]; then
+		echo "Cmnd_Alias MULTIPATH=$MULTIPATH -l"
+	else
+		echo "Cmnd_Alias MULTIPATH=$MULTIPATH -l, $SUDO"
+	fi
 	echo "nagios  ALL= NOPASSWD: MULTIPATH"
 	echo "The user nagios may very well be nobody or someone else depending on your configuration"
 	echo ""
@@ -72,9 +77,14 @@ if [ $(id -un) != "root" ]; then
 		exit $STATE_UNKNOWN
 	fi
 	MULTIPATH="$SUDO $MULTIPATH"
+
+	# on grsec kernel /proc might be protected
+	if [ ! -r /proc/modules ]; then
+		LSMOD="$SUDO $LSMOD"
+	fi
 fi
 
-MODCOUNT=`/sbin/lsmod | grep -c ^dm_multipath`
+MODCOUNT=`$LSMOD | grep -c ^dm_multipath`
 if [ $MODCOUNT -gt 0 ]; then
 	PATHCOUNT=`$MULTIPATH -l | wc -l`
 	if [ $PATHCOUNT -eq 0 ]; then
