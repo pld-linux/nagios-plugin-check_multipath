@@ -1,13 +1,14 @@
 %define		_plugin	check_multipath
-Summary:	Nagios plugin to check the state of Linux device mapper multipath devices.
+Summary:	Nagios plugin to check the state of Linux device mapper multipath devices
 Name:		nagios-plugin-%{_plugin}
 Version:	1.0
-Release:	0.1
+Release:	0.2
 License:	GPL v2
 Group:		Networking
 Source0:	%{name}.sh
 URL:		http://tinyurl.com/2aunjl
 Requires:	nagios-core
+Requires:	nagios-plugins-libs
 Requires:	sudo
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -16,7 +17,8 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define		_sysconfdir	/etc/nagios/plugins
 
 %description
-Nagios plugin to check the state of Linux device mapper multipath devices.
+Nagios plugin to check the state of Linux device mapper multipath
+devices.
 
 %prep
 %setup -qcT
