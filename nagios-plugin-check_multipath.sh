@@ -20,19 +20,26 @@ LSMOD=/sbin/lsmod
 
 print_usage() {
 	echo "Usage:"
-	echo "  $PROGNAME"
+	echo "  $PROGNAME [-n NUMPATHS]"
+	echo ""
+	echo "Options:"
+	echo "  -n NUMPATHS     If specified there must be NUMPATHS paths present for each LUN"
 }
 
 print_help() {
 	print_revision $PROGNAME $REVISION
+
+	echo "Check multipath status."
 	echo ""
 	print_usage
 	echo ""
-	echo "Check multipath status"
+	echo "Really simple: runs $MULTIPATH and greps for \"failed\" paths."
+	echo "if NUMPATHS is specified each LUN must have that number of PATHS present."
 	echo ""
-	echo "really simple: runs $MULTIPATH and greps for \"failed\" paths. No options yet."
-	echo "Requires sudo."
+
+	echo "Requires sudo and multipath-tools"
 	echo ""
+
 	echo "Add this to your sudoers file by running visudo to add access:"
 	if [ -r /proc/modules ]; then
 		echo "Cmnd_Alias MULTIPATH=$MULTIPATH -l"
@@ -44,6 +51,8 @@ print_help() {
 	echo ""
 	support
 }
+
+NUMPATHS=''
 
 # Information options
 case "$1" in
@@ -62,6 +71,10 @@ case "$1" in
 -V)
 	print_revision $PLUGIN $REVISION
 	exit $STATE_OK
+	;;
+-n)
+	shift
+	NUMPATHS="$1"
 	;;
 esac
 
@@ -85,25 +98,30 @@ if [ $(id -un) != "root" ]; then
 fi
 
 MODCOUNT=`$LSMOD | grep -c ^dm_multipath`
-if [ $MODCOUNT -gt 0 ]; then
-	OUTPUT=$($MULTIPATH -l)
-	PATHCOUNT=$(echo "$OUTPUT" | wc -l)
-	if [ $PATHCOUNT -eq 0 ]; then
-		echo "MULTIPATH: WARNING - no paths defined"
-		exit $STATEWARNING
-	else
-		FAILCOUNT=$(echo "$OUTPUT" | grep -c failed)
-		if [ $FAILCOUNT -eq 0 ]; then
-			echo "MULTIPATH: OK - no failed paths"
-			exit $STATE_OK
-		else
-			echo "MULTIPATH: CRITICAL - $FAILCOUNT paths failed"
-			exit $STATE_CRITICAL
-		fi
-	fi
-else
-	echo "MULTIPATH: UNKNOWN - module dm_multipath not loaded"
+if [ $MODCOUNT = 0 ]; then
+	echo "MULTIPATH: UNKNOWN - Module dm-multipath not loaded"
 	exit $STATE_UNKNOWN
 fi
+
+OUTPUT=$($MULTIPATH -l)
+PATHCOUNT=$(echo "$OUTPUT" | wc -l)
+if [ $PATHCOUNT -eq 0 ]; then
+	echo "MULTIPATH: WARNING - No paths defined"
+	exit $STATEWARNING
+fi
+
+FAILCOUNT=$(echo "$OUTPUT" | grep -c failed)
+if [ $FAILCOUNT -gt 0 ]; then
+	echo "MULTIPATH: CRITICAL - $FAILCOUNT paths failed"
+	exit $STATE_CRITICAL
+fi
+
+if [ "$NUMPATHS" ]; then
+	echo "MULTIPATH: NUMPATHS check not implemented"
+	exit $STATE_UNKNOWN
+fi
+
+echo "MULTIPATH: OK - No failed paths"
+exit $STATE_OK
 
 # vim: ts=4:sw=4:noet
