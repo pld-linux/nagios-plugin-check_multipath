@@ -60,28 +60,28 @@ case "$1" in
 	;;
 esac
 
-# if not yet root, check sudo first
+if [ ! -x $MULTIPATH ]; then
+	echo "MULTIPATH: UNKNOWN - $MULTIPATH not found"
+	exit $STATE_UNKNOWN
+fi
+
+# if not yet root, check sudo
 if [ $(id -un) != "root" ]; then
-	if [ `$SUDO | grep -c multipath` -eq 0 ]; then
+	if [ `$SUDO -l | grep -c multipath` -eq 0 ]; then
 		echo "MULTIPATH: UNKNOWN - sudo not configured"
 		exit $STATE_UNKNOWN
 	fi
 	MULTIPATH="$SUDO $MULTIPATH"
 fi
 
-if [ ! -x /sbin/multipath ]; then
-	echo "MULTIPATH: UNKNOWN - /sbin/multipath not found"
-	exit $STATE_UNKNOWN
-fi
-
 MODCOUNT=`/sbin/lsmod | grep -c ^dm_multipath`
-if [ $MODCOUNT -gt 0 ]; then	
+if [ $MODCOUNT -gt 0 ]; then
 	PATHCOUNT=`$MULTIPATH -l | wc -l`
 	if [ $PATHCOUNT -eq 0 ]; then
 		echo "MULTIPATH: WARNING - no paths defined"
 		exit $STATEWARNING
 	else
-		FAILCOUNT=`$MULTIPATH -l|grep -c failed`
+		FAILCOUNT=`$MULTIPATH -l | grep -c failed`
 		if [ $FAILCOUNT -eq 0 ]; then
 			echo "MULTIPATH: OK - no failed paths"
 			exit $STATE_OK
@@ -93,6 +93,6 @@ if [ $MODCOUNT -gt 0 ]; then
 else
 	echo "MULTIPATH: UNKNOWN - module dm_multipath not loaded"
 	exit $STATE_UNKNOWN
-fi	
+fi
 
-# vim: ts=4
+# vim: ts=4:sw=4:noet
