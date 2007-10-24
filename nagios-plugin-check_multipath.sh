@@ -86,12 +86,13 @@ fi
 
 MODCOUNT=`$LSMOD | grep -c ^dm_multipath`
 if [ $MODCOUNT -gt 0 ]; then
-	PATHCOUNT=`$MULTIPATH -l | wc -l`
+	OUTPUT=$($MULTIPATH -l)
+	PATHCOUNT=$(echo "$OUTPUT" | wc -l)
 	if [ $PATHCOUNT -eq 0 ]; then
 		echo "MULTIPATH: WARNING - no paths defined"
 		exit $STATEWARNING
 	else
-		FAILCOUNT=`$MULTIPATH -l | grep -c failed`
+		FAILCOUNT=$(echo "$OUTPUT" | grep -c failed)
 		if [ $FAILCOUNT -eq 0 ]; then
 			echo "MULTIPATH: OK - no failed paths"
 			exit $STATE_OK
