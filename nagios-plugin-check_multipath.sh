@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Nagios plugin to check the state of Linux device mapper multipath devices
-# 
+#
 # (C) 2006 Riege Software International GmbH
 # Licensed under the General Public License, Version 2
 # Contact: Gunther Schlegel, schlegel@riege.com
@@ -18,81 +18,81 @@ MULTIPATH=/sbin/multipath
 SUDO=/usr/bin/sudo
 
 print_usage() {
-  echo "Usage:"
-  echo "  $PROGNAME"
+	echo "Usage:"
+	echo "  $PROGNAME"
 }
 
 print_help() {
-  print_revision $PROGNAME $REVISION
-  echo ""
-  print_usage
-  echo ""
-  echo "Check multipath status"
-  echo ""
-  echo "really simple: runs $MULTIPATH and greps for \"failed\" paths. No options yet."
-  echo "Requires sudo."
-  echo ""
-  echo "Add this to your sudoers file by running visudo to add access:"
-  echo "Cmnd_Alias MULTIPATH=$MULTIPATH -l"
-  echo "nagios  ALL= NOPASSWD: MULTIPATH"
-  echo "The user nagios may very well be nobody or someone else depending on your configuration"
-  echo ""
-  support
+	print_revision $PROGNAME $REVISION
+	echo ""
+	print_usage
+	echo ""
+	echo "Check multipath status"
+	echo ""
+	echo "really simple: runs $MULTIPATH and greps for \"failed\" paths. No options yet."
+	echo "Requires sudo."
+	echo ""
+	echo "Add this to your sudoers file by running visudo to add access:"
+	echo "Cmnd_Alias MULTIPATH=$MULTIPATH -l"
+	echo "nagios  ALL= NOPASSWD: MULTIPATH"
+	echo "The user nagios may very well be nobody or someone else depending on your configuration"
+	echo ""
+	support
 }
 
 # Information options
 case "$1" in
 --help)
-		print_help
-    exit $STATE_OK
-    ;;
+	print_help
+	exit $STATE_OK
+	;;
 -h)
-		print_help
-    exit $STATE_OK
-    ;;
+	print_help
+	exit $STATE_OK
+	;;
 --version)
-		print_revision $PLUGIN $REVISION
-    exit $STATE_OK
-    ;;
+	print_revision $PLUGIN $REVISION
+	exit $STATE_OK
+	;;
 -V)
-		print_revision $PLUGIN $REVISION
-    exit $STATE_OK
-    ;;
+	print_revision $PLUGIN $REVISION
+	exit $STATE_OK
+	;;
 esac
 
 # if not yet root, check sudo first
 if [ $(id -un) != "root" ]; then
-	if [ `$SUDO | grep -c multipath` -eq 0 ]; then 
+	if [ `$SUDO | grep -c multipath` -eq 0 ]; then
 		echo "MULTIPATH: UNKNOWN - sudo not configured"
 		exit $STATE_UNKNOWN
 	fi
 	MULTIPATH="$SUDO $MULTIPATH"
 fi
 
-	if [ ! -x /sbin/multipath ]; then 
-		echo "MULTIPATH: UNKNOWN - /sbin/multipath not found"
-		exit $STATE_UNKNOWN
-	fi
+if [ ! -x /sbin/multipath ]; then
+	echo "MULTIPATH: UNKNOWN - /sbin/multipath not found"
+	exit $STATE_UNKNOWN
+fi
 
-		MODCOUNT=`/sbin/lsmod | grep -c ^dm_multipath`
-		if [ $MODCOUNT -gt 0 ]; then	
-			PATHCOUNT=`$MULTIPATH -l | wc -l`
-			if [ $PATHCOUNT -eq 0 ]; then
-				echo "MULTIPATH: WARNING - no paths defined"
-				exit $STATEWARNING
-			else 
-				FAILCOUNT=`$MULTIPATH -l|grep -c failed`
-				if [ $FAILCOUNT -eq 0 ]; then
-					echo "MULTIPATH: OK - no failed paths"
-					exit $STATE_OK
-				else
-					echo "MULTIPATH: CRITICAL - $FAILCOUNT paths failed"
-					exit $STATE_CRITICAL
-				fi
-			fi
-		else 
-			echo "MULTIPATH: UNKNOWN - module dm_multipath not loaded"
-			exit $STATE_UNKNOWN
-		fi	
+MODCOUNT=`/sbin/lsmod | grep -c ^dm_multipath`
+if [ $MODCOUNT -gt 0 ]; then	
+	PATHCOUNT=`$MULTIPATH -l | wc -l`
+	if [ $PATHCOUNT -eq 0 ]; then
+		echo "MULTIPATH: WARNING - no paths defined"
+		exit $STATEWARNING
+	else
+		FAILCOUNT=`$MULTIPATH -l|grep -c failed`
+		if [ $FAILCOUNT -eq 0 ]; then
+			echo "MULTIPATH: OK - no failed paths"
+			exit $STATE_OK
+		else
+			echo "MULTIPATH: CRITICAL - $FAILCOUNT paths failed"
+			exit $STATE_CRITICAL
+		fi
+	fi
+else
+	echo "MULTIPATH: UNKNOWN - module dm_multipath not loaded"
+	exit $STATE_UNKNOWN
+fi	
 
 # vim: ts=4
