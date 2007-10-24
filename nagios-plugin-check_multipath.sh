@@ -85,12 +85,7 @@ fi
 
 # if not yet root, check sudo
 if [ $(id -un) != "root" ]; then
-	if [ `$SUDO -l | grep -c multipath` -eq 0 ]; then
-		echo "MULTIPATH: UNKNOWN - sudo not configured"
-		exit $STATE_UNKNOWN
-	fi
 	MULTIPATH="$SUDO $MULTIPATH"
-
 	# on grsec kernel /proc might be protected
 	if [ ! -r /proc/modules ]; then
 		LSMOD="$SUDO $LSMOD"
@@ -100,6 +95,11 @@ fi
 OUTPUT=$($MULTIPATH -l 2>/dev/null)
 if [ $? != 0 ]; then
 	# Failed. grab more info why
+	if [ $(id -un) != "root" ] && [ `$SUDO -l | grep -c multipath` -eq 0 ]; then
+		echo "MULTIPATH: UNKNOWN - sudo not configured"
+		exit $STATE_UNKNOWN
+	fi
+
 	MODCOUNT=$($LSMOD | grep -c ^dm_multipath)
 	if [ $MODCOUNT = 0 ]; then
 		echo "MULTIPATH: UNKNOWN - Module dm-multipath not loaded"
