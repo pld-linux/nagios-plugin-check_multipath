@@ -14,7 +14,8 @@ REVISION=`echo '$Revision$' | sed -e 's/[^0-9.]//g'`
 
 . $PROGPATH/utils.sh
 
-MULTIPATH='/usr/bin/sudo /sbin/multipath'
+MULTIPATH=/sbin/multipath
+SUDO=/usr/bin/sudo
 
 print_usage() {
   echo "Usage:"
@@ -28,11 +29,11 @@ print_help() {
   echo ""
   echo "Check multipath status"
   echo ""
-  echo "really simple: runs /sbin/multipath and greps for \"failed\" paths. No options yet."
+  echo "really simple: runs $MULTIPATH and greps for \"failed\" paths. No options yet."
   echo "Requires sudo."
   echo ""
   echo "Add this to your sudoers file by running visudo to add access:"
-  echo "Cmnd_Alias MULTIPATH=/sbin/multipath -l"
+  echo "Cmnd_Alias MULTIPATH=$MULTIPATH -l"
   echo "nagios  ALL= NOPASSWD: MULTIPATH"
   echo "The user nagios may very well be nobody or someone else depending on your configuration"
   echo ""
@@ -59,15 +60,23 @@ case "$1" in
     ;;
 esac
 
-# check
-if [ `/usr/bin/sudo -l|grep -c multipath` -eq 0 ]; then 
-	echo "MULTIPATH: UNKNOWN - sudo not configured"
-	exit $STATE_UNKNOWN
-else 
-	if [  -x /sbin/multipath ]; then 
-		MODCOUNT=`/sbin/lsmod|grep -c ^dm_multipath`
+# if not yet root, check sudo first
+if [ $(id -un) != "root" ]; then
+	if [ `$SUDO | grep -c multipath` -eq 0 ]; then 
+		echo "MULTIPATH: UNKNOWN - sudo not configured"
+		exit $STATE_UNKNOWN
+	fi
+	MULTIPATH="$SUDO $MULTIPATH"
+fi
+
+	if [ ! -x /sbin/multipath ]; then 
+		echo "MULTIPATH: UNKNOWN - /sbin/multipath not found"
+		exit $STATE_UNKNOWN
+	fi
+
+		MODCOUNT=`/sbin/lsmod | grep -c ^dm_multipath`
 		if [ $MODCOUNT -gt 0 ]; then	
-			PATHCOUNT=`$MULTIPATH -l|wc -l`
+			PATHCOUNT=`$MULTIPATH -l | wc -l`
 			if [ $PATHCOUNT -eq 0 ]; then
 				echo "MULTIPATH: WARNING - no paths defined"
 				exit $STATEWARNING
@@ -85,10 +94,5 @@ else
 			echo "MULTIPATH: UNKNOWN - module dm_multipath not loaded"
 			exit $STATE_UNKNOWN
 		fi	
-	else
-		echo "MULTIPATH: UNKNOWN - /sbin/multipath not found"
-		exit $STATE_UNKNOWN
-	fi
-fi
 
 # vim: ts=4
