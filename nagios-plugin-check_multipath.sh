@@ -117,8 +117,27 @@ if [ $FAILCOUNT -gt 0 ]; then
 fi
 
 if [ "$NUMPATHS" ]; then
-	echo "MULTIPATH: NUMPATHS check not implemented"
-	exit $STATE_UNKNOWN
+	echo "$OUTPUT" | awk -vnumpaths=$NUMPATHS -vrc=0 -vlun= -vtargets=0 '
+	/^\[/{next} # skip flags
+   	/^\\/{targets++; next} # count targets
+	/^ \\/{next} # skip devinfo
+	{
+		# The LUN line
+		# process if this is not first LUN
+		if (lun && numpaths != targets) {
+			printf("CRITICAL: %d of %d paths available for LUN %s\n", numpaths, targets, lun);
+			rc = 1
+		}
+
+		# reset counter
+		targets=0
+		lun=$0
+	}
+	END { exit rc }
+	'
+	if [ $? -gt 0 ]; then
+		exit $STATE_CRITICAL
+	fi
 fi
 
 echo "MULTIPATH: OK - No failed paths"
