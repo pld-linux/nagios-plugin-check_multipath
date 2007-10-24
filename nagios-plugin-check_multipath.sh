@@ -125,13 +125,13 @@ if [ "$NUMPATHS" ]; then
 		# The LUN line
 		# process if this is not first LUN
 		if (lun && numpaths != targets) {
-			printf("CRITICAL: %d of %d paths available for LUN %s\n", numpaths, targets, lun);
+			printf("CRITICAL: %d of %d paths available for LUN %s\n", numpaths, targets, lun)
 			rc = 1
 		}
 
 		# reset counter
-		targets=0
-		lun=$0
+		targets = 0
+		lun = $0
 	}
 	END { exit rc }
 	'
