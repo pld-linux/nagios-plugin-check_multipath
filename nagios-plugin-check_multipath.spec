@@ -2,11 +2,12 @@
 Summary:	Nagios plugin to check the state of Linux device mapper multipath devices
 Name:		nagios-plugin-%{_plugin}
 Version:	1.0
-Release:	0.2
+Release:	0.4
 License:	GPL v2
 Group:		Networking
 Source0:	%{name}.sh
 URL:		http://tinyurl.com/2aunjl
+Requires:	awk
 Requires:	nagios-core
 Requires:	nagios-plugins-libs
 Requires:	sudo
