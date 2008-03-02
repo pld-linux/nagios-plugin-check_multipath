@@ -1,5 +1,6 @@
 %define		_plugin	check_multipath
 Summary:	Nagios plugin to check the state of Linux device mapper multipath devices
+Summary(pl.UTF-8):	Wtyczka Nagiosa do sprawdzania stanu urządzeń multipath device mappera
 Name:		nagios-plugin-%{_plugin}
 Version:	1.0
 Release:	0.4
@@ -20,6 +21,10 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 Nagios plugin to check the state of Linux device mapper multipath
 devices.
+
+%description -l pl.UTF-8
+Wtyczka Nagiosa do sprawdzania stanu urządzeń multipath linuksowego
+device mappera.
 
 %prep
 %setup -qcT
