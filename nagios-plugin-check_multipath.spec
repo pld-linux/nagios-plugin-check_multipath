@@ -7,9 +7,10 @@ Release:	0.6
 License:	GPL v2
 Group:		Networking
 Source0:	%{name}.sh
-URL:		http://tinyurl.com/2aunjl
+URL:		http://www.nagiosexchange.org/cgi-bin/page.cgi?g=Detailed/1996.html
 Requires(post,postun):	sudo
 Requires:	awk
+Requires:	multipath-tools
 Requires:	nagios-core
 Requires:	nagios-plugins-libs
 Requires:	sudo
