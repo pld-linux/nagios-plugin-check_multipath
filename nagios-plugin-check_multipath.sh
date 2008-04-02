@@ -131,7 +131,7 @@ if [ "$NUMPATHS" ]; then
 		# The LUN line
 		# process if this is not first LUN
 		if (lun && numpaths != targets) {
-			printf("CRITICAL: %d of %d paths available for LUN %s\n", numpaths, targets, lun)
+			printf("CRITICAL: %d of %d paths available for LUN %s\n", targets, numpaths, lun)
 			rc = 1
 		}
 
