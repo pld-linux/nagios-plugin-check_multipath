@@ -3,7 +3,7 @@ Summary:	Nagios plugin to check the state of Linux device mapper multipath devic
 Summary(pl.UTF-8):	Wtyczka Nagiosa do sprawdzania stanu urządzeń multipath device mappera
 Name:		nagios-plugin-%{plugin}
 Version:	1.0
-Release:	0.6
+Release:	1
 License:	GPL v2
 Group:		Networking
 Source0:	%{name}.sh
@@ -53,8 +53,10 @@ rm -rf $RPM_BUILD_ROOT
 %post
 if ! grep -q '^Cmnd_Alias MULTIPATH' /etc/sudoers; then
 	cat >> /etc/sudoers <<-'EOF'
-		Cmnd_Alias MULTIPATH=/sbin/multipath -l
-		nagios  ALL= NOPASSWD: MULTIPATH
+		User_Alias MULTIPATH=nagios
+		Cmnd_Alias MULTIPATH=/sbin/multipath -l,/sbin/lsmod
+		Defaults:MULTIPATH !syslog
+		MULTIPATH ALL=(root) NOPASSWD: MULTIPATH
 	EOF
 fi
 
