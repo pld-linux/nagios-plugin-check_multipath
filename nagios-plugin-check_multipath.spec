@@ -2,7 +2,7 @@
 Summary:	Nagios plugin to check the state of Linux device mapper multipath devices
 Summary(pl.UTF-8):	Wtyczka Nagiosa do sprawdzania stanu urządzeń multipath device mappera
 Name:		nagios-plugin-%{plugin}
-Version:	1.0
+Version:	1.2
 Release:	1
 License:	GPL v2
 Group:		Networking
@@ -38,6 +38,18 @@ cat > nagios.cfg <<'EOF'
 define command {
 	command_name    %{plugin}
 	command_line    %{plugindir}/%{plugin}
+}
+
+define service {
+	use                     generic-service
+	name                    multipath
+	service_description     multipath
+	register                0
+
+	normal_check_interval   15
+	notification_interval   300
+
+	check_command           check_multipath
 }
 EOF
 
