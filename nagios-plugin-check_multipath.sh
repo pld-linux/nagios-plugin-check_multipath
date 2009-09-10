@@ -110,8 +110,8 @@ if [ $? != 0 ]; then
 	exit $STATE_UNKNOWN
 fi
 
-PATHCOUNT=$(echo "$OUTPUT" | wc -l)
-if [ $PATHCOUNT -eq 0 ]; then
+PATHCOUNT=$(echo -n "$OUTPUT" | wc -l)
+if [ $PATHCOUNT = 0 ]; then
 	echo "MULTIPATH: WARNING - No paths defined"
 	exit $STATE_WARNING
 fi
