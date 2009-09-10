@@ -130,6 +130,14 @@ if [ "$NUMPATHS" ]; then
 	#	 \_ 0:0:0:1 sdb 8:16  [active][undef] [4]
 	#	\_ round-robin 0 [prio=0][enabled]
 	#	 \_ 0:0:1:1 sdg 8:96  [active][undef]
+
+	#	360060160a239180020ef6e37ed11db11dm-8 DGC     ,RAID 5 [1]
+	#	[size=1.3T][features=1 queue_if_no_path][hwhandler=1 emc] [2]
+	#	\_ round-robin 0 [prio=0][active] [3]
+	#	 \_ 0:0:0:0 sda 8:0   [active][undef] [4]
+	#	 \_ round-robin 0 [prio=0][enabled]
+	#	  \_ 0:0:3:0 sdi 8:128 [active][undef]
+
 	# multipath-tools-0.4.8-13.x86_64
 	#	LUN-33 (36006016002c11800ec11344a7134dc11) dm-6 DGC,RAID 10 [1]
 	#	size=30G features='1 queue_if_no_path' hwhandler='1 emc' wp=rw [2]
@@ -148,7 +156,7 @@ if [ "$NUMPATHS" ]; then
 	BEGIN {
 		nlun = -1;
 	}
-	/([0-9a-f]*) dm-[0-9]+/ { # find lun [1]
+	/([0-9a-f]*) dm-[0-9]+/ || /[0-9a-f]*dm-[0-9]+/ { # find lun [1]
 		nlun++;
 		names[nlun] = $1 " " $2;
 		targets[nlun] = 0;
