@@ -3,7 +3,7 @@ Summary:	Nagios plugin to check the state of Linux device mapper multipath devic
 Summary(pl.UTF-8):	Wtyczka Nagiosa do sprawdzania stanu urządzeń multipath device mappera
 Name:		nagios-plugin-%{plugin}
 Version:	1.2
-Release:	1
+Release:	2
 License:	GPL v2
 Group:		Networking
 Source0:	%{name}.sh
